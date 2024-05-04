@@ -30,4 +30,13 @@ const app = express();
 
 */
 
-connectDb();
+connectDb() // connecting the database to the app's server
+.then(()=>{
+  app.listen(process.env.PORT || 8000,()=>{
+    console.log(`Server is running on port ${process.env.PORT}`)
+  })
+})
+.catch((err) => {
+  console.error("MongoDB connection failed",err)
+  throw err;
+})
