@@ -1,2 +1,1 @@
-export const DB_NAME = "iChat";
-
+export const DB_NAME = "harsh";
