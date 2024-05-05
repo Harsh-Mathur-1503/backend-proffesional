@@ -58,11 +58,11 @@ UserSchema.pre("save", async function (next) {
   next();
 });
 
-userSchema.methods.isPasswordMatch = async function (password) {
+UserSchema.methods.isPasswordMatch = async function (password) {
   return await bcrypt.compare(password, this.password);
 };
 
-userSchema.methods.generateAccessToken = function () {
+UserSchema.methods.generateAccessToken = function () {
   jwt.sign(
     {
       _id:this._id,
@@ -77,7 +77,7 @@ userSchema.methods.generateAccessToken = function () {
   )
 };
 
-userSchema.methods.generateRefreshToken = function () {
+UserSchema.methods.generateRefreshToken = function () {
   jwt.sign(
     {
       _id: this._id,
