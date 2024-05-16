@@ -5,6 +5,7 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { DeleteFromCloudinary } from "../utils/cloudinary.js"
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 
 const generateAccessAndRefereshTokens = async (userId) => {
   try {
@@ -395,5 +396,52 @@ const getUserChannelProfile = asyncHandler(async(req,res)=>{
 
 
 
+const getWatchHistory = asyncHandler(async(req,res)=>{
+  const user = await User.aggregate([
+    {
+      $match:{
+        _id : new mongoose.Types.ObjectId(req.user?._id),
+      }
+    },{
+      $lookup:{
+        from:"videos",
+        localField:"watchHistory",
+        foreignField:"_id",
+        as:"watchHistory",
+        pipeline:[
+          {
+            $lookup:{
+              from:"users",
+              localField:"videos",
+              foreignField:"_id",
+              as:"owner",
+              pipeline:[
+                {
+                  $project:{
+                    fullname:1,
+                    username:1,
+                    avatar:1,
+                  }
+                }
+              ]
+            },
+          },{
+            $addFields:{
+              owner:{
+                $first:"$owner",
+              }
+            }
+          }
+        ]
+      }
+    }
+  ])
 
-export { registerUser, loginUser, logoutUser, refreshAccessToken , changeCurrentPassword, getCurrentUser , updateAccountDetails , updateUserAvatar , updateCoverImage , getUserChannelProfile};
+  return res
+  .status(200)
+  .json(new ApiResponse(200,user[0].watchHistory, "Watch history fetched successfully"));
+})
+
+
+
+export { registerUser, loginUser, logoutUser, refreshAccessToken , changeCurrentPassword, getCurrentUser , updateAccountDetails , updateUserAvatar , updateCoverImage , getUserChannelProfile , getWatchHistory};
