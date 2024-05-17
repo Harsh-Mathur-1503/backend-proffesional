@@ -1,6 +1,6 @@
 import { v2 as cloudinary } from "cloudinary";
-import { response } from "express";
 import fs from "fs";
+import path from "path"; // Import path module for better file path handling
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -11,32 +11,56 @@ cloudinary.config({
 const uploadOnCloudinary = async (localFilePath) => {
   try {
     if (!localFilePath) {
-      console.log("Please provide a file path");
+      console.error("Please provide a file path");
       return null;
     }
-    // upload the file on cloudinary
+
+    // Upload the file to Cloudinary
     const response = await cloudinary.uploader.upload(localFilePath, {
       resource_type: "auto",
     });
-    // file has been uploader successfully
+
     console.log("File has been uploaded successfully", response.url);
-    
-    fs.unlinkSync(localFilePath); // remove the locally saved temporary file
+
+    if (fs.existsSync(localFilePath)) {
+      fs.unlinkSync(localFilePath); // Remove the locally saved temporary file
+    }
     return response;
   } catch (error) {
-    fs.unlinkSync(localFilePath); // remove the locally saved temporary file as upload option failed
-    console.log("Error uploading file", error);
-    return null;
+    if (fs.existsSync(localFilePath)) {
+      fs.unlinkSync(localFilePath); // Remove the locally saved temporary file if upload failed
+    }
+    console.error("Error uploading file", error);
+    return { error: "Error uploading file", details: error };
   }
 };
 
-// cloudinary.uploader.upload(
-//   "https://upload.wikimedia.org/wikipedia/commons/a/ae/Olympic_flag.jpg",
-//   { public_id: "olympic_flag" },
-//   function (error, result) {
-//     console.log(result);
-//   }
-// );
+const uploadVideoOnCloudinary = async (localFilePath) => {
+  try {
+    if (!localFilePath) {
+      console.error("Please provide a file path");
+      return null;
+    }
+
+    // Upload the video to Cloudinary
+    const response = await cloudinary.uploader.upload(localFilePath, {
+      resource_type: "video",
+    });
+
+    console.log("File has been uploaded successfully", response.url);
+
+    if (fs.existsSync(localFilePath)) {
+      fs.unlinkSync(localFilePath); // Remove the locally saved temporary file
+    }
+    return response;
+  } catch (error) {
+    if (fs.existsSync(localFilePath)) {
+      fs.unlinkSync(localFilePath); // Remove the locally saved temporary file if upload failed
+    }
+    console.error("Error uploading file", error);
+    return { error: "Error uploading file", details: error };
+  }
+};
 
 const DeleteFromCloudinary = async (localPath) => {
   if (!localPath) {
@@ -44,7 +68,7 @@ const DeleteFromCloudinary = async (localPath) => {
   }
 
   try {
-    const publicId = localPath.split("/").pop().split(".")[0];
+    const publicId = path.basename(localPath, path.extname(localPath)); // Better way to get public ID
     const response = await cloudinary.uploader.destroy(publicId);
     console.log("File has been deleted successfully", response);
     return response;
@@ -54,5 +78,4 @@ const DeleteFromCloudinary = async (localPath) => {
   }
 };
 
-
-export { uploadOnCloudinary, DeleteFromCloudinary}
+export { uploadOnCloudinary, DeleteFromCloudinary, uploadVideoOnCloudinary };
