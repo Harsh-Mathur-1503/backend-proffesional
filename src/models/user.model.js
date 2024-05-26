@@ -59,6 +59,16 @@ UserSchema.pre("save", async function (next) {
 });
 
 UserSchema.methods.isPasswordValid = async function (password) {
+  if (!password) {
+    console.error("Password to compare is missing");
+    throw new Error("Password to compare is missing");
+  }
+
+  if (!this.password) {
+    console.error("Stored hash is missing");
+    throw new Error("Stored hash is missing");
+  }
+
   return await bcrypt.compare(password, this.password);
 };
 

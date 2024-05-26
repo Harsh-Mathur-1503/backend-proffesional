@@ -19,7 +19,7 @@ const generateAccessAndRefereshTokens = async (userId) => {
   } catch (error) {
     throw new ApiError(
       500,
-      "Something went wrong while generating referesh and access token"
+      "Something went wrong while generating referesh and access token",error
     );
   }
 };
@@ -126,12 +126,15 @@ const loginUser = asyncHandler(async (req, res) => {
   if (!user) {
     throw new ApiError(404, "User does not exist");
   }
+  console.log("User found: ", user);
+  console.log("Password to compare: ", password);
+  console.log("Stored hashed password: ", user.password);
 
-  const isPasswordValid = await user.isPasswordValid(password);
-
-  if (!isPasswordValid) {
-    throw new ApiError(401, "Invalid user credentials");
-  }
+    const isPasswordCorrect = await user.isPasswordValid(password);
+  
+    if (!isPasswordCorrect) {
+      throw new ApiError(401, "Invalid user credentials");
+    }
 
   const { accessToken, refreshToken } = await generateAccessAndRefereshTokens(
     user._id
