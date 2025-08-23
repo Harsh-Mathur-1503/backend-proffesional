@@ -127,8 +127,6 @@ const loginUser = asyncHandler(async (req, res) => {
     throw new ApiError(404, "User does not exist");
   }
   console.log("User found: ", user);
-  console.log("Password to compare: ", password);
-  console.log("Stored hashed password: ", user.password);
 
     const isPasswordCorrect = await user.isPasswordValid(password);
   
