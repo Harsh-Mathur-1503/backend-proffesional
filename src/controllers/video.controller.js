@@ -34,6 +34,9 @@ const getAllVideos = asyncHandler(async (req, res) => {
     ];
   }
   if (userId) {
+    if (typeof userId !== "string" || !isValidObjectId(userId)) {
+      return res.status(400).json(new ApiResponse(400, "Invalid userId"));
+    }
     filter.owner = userId;
   }
 
