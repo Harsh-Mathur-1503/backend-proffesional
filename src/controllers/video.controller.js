@@ -127,6 +127,9 @@ const updateVideo = asyncHandler(async (req, res) => {
   if (!title || !description) {
     throw new ApiError(400, "Title and description are required");
   }
+  if (typeof title !== "string" || typeof description !== "string") {
+    throw new ApiError(400, "Title and description must be strings");
+  }
 
   try {
     const oldFoundVideo = await Video.findById(videoId);
@@ -136,7 +139,7 @@ const updateVideo = asyncHandler(async (req, res) => {
 
     const updatedVideo = await Video.findByIdAndUpdate(
       videoId,
-      { title, description },
+      { $set: { title, description } },
       { new: true }
     );
 
