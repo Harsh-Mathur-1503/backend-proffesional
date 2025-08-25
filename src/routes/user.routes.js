@@ -1,3 +1,4 @@
+import rateLimit from "express-rate-limit";
 import { Router } from "express";
 import {
   getCurrentUser,
@@ -16,6 +17,13 @@ import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 const router = Router();
 
+// Rate limiter for sensitive endpoints (e.g., history)
+const historyRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // 100 requests per window per IP
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 router.route("/register").post(
   upload.fields([
     {
@@ -53,6 +61,6 @@ router
 
 router.route("/c/:username").get(getUserChannelProfile);
 
-router.route("/history").get(verifyJWT, getWatchHistory);
+router.route("/history").get(historyRateLimiter, verifyJWT, getWatchHistory);
 
 export default router;
