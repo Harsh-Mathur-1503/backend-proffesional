@@ -135,7 +135,7 @@ const getLikedVideos = asyncHandler(async (req, res) => {
   }
   try {
     const likedVideos = await Like.find({
-      user: userId,
+      user: { $eq: userId },
       videos: { $exists: true },
     });
     if (!likedVideos) {
