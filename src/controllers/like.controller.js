@@ -114,9 +114,9 @@ const toggleTweetLike = asyncHandler(async (req, res) => {
         .status(201)
         .json(new ApiResponse(201, "Tweet Liked successfully", savedTweetLike));
     } else {
-      const deletedTweetLike = await Like.findByIdAndDelete({
-        tweet: tweetId,
-        user: userId,
+      const deletedTweetLike = await Like.findOneAndDelete({
+        tweet: { $eq: tweetId },
+        user: { $eq: userId },
       });
       if (!deletedTweetLike) {
         throw new ApiError(500, "Your like was not removed");
