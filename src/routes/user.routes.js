@@ -24,6 +24,14 @@ const historyRateLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
+
+// Rate limiter for media update endpoints (avatar/cover image)
+const mediaUpdateRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20, // limit repeated expensive upload/db operations per IP
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 router.route("/register").post(
   upload.fields([
     {
@@ -57,7 +65,12 @@ router
 
 router
   .route("/cover-image")
-  .patch(verifyJWT, upload.single("coverImage"), updateCoverImage);
+  .patch(
+    mediaUpdateRateLimiter,
+    verifyJWT,
+    upload.single("coverImage"),
+    updateCoverImage
+  );
 
 router.route("/c/:username").get(getUserChannelProfile);
 
