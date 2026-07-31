@@ -100,7 +100,10 @@ const toggleTweetLike = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Provide a valid User Id");
   }
   try {
-    const likedTweet = await Like.findOne({ tweet: tweetId, user: userId });
+    const likedTweet = await Like.findOne({
+      tweet: { $eq: tweetId },
+      user: { $eq: userId },
+    });
     if (!likedTweet) {
       const newTweetLike = new Like({ tweet: tweetId, user: userId });
       if (!newTweetLike) {
