@@ -62,16 +62,18 @@ const updateTweet = asyncHandler(async (req, res) => {
   if (!tweetId || !isValidObjectId(tweetId)) {
     throw new ApiError(400, "Provide a valid tweet id");
   }
-  // Extract updated content from request body
+  // Extract and validate updated content from request body
   const { content } = req.body;
-  if (!content) {
+  if (typeof content !== "string" || !content.trim()) {
     throw new ApiError(400, "Content is required for updating tweet");
   }
+  const sanitizedContent = content.trim();
+
   try {
     // Find tweet by id and update
     const updatedTweet = await Tweet.findByIdAndUpdate(
       tweetId,
-      { content },
+      { content: sanitizedContent },
       { new: true }
     );
     if (!updatedTweet) {
